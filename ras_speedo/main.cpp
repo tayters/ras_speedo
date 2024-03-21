@@ -27,6 +27,10 @@ using namespace cv;
 using namespace std;
 
 bool mouseClick_Flag = false;
+bool mouseClickRelease_Flag = false;
+Point startpoint, endpoint;
+bool drawing = false;
+
 
 class PointData {
     public:
@@ -44,6 +48,10 @@ class Fish
 
 };
 
+
+
+
+
 void onMouseClick(int event, int x, int y, int flags, void* userdata) { //function to track mouse movement and click//
      
     PointData* pd = static_cast<PointData*>(userdata);
@@ -53,7 +61,19 @@ void onMouseClick(int event, int x, int y, int flags, void* userdata) { //functi
         mouseClick_Flag = true;
         pd->p.x = x;
         pd->p.y = y;
+        startpoint = Point(x, y);
+        endpoint = Point(x, y);
+        drawing = true;
     }
+    else if (event == EVENT_MOUSEMOVE && drawing) {
+        endpoint = Point(x, y);
+    }
+    else if (event == EVENT_LBUTTONUP) {
+        endpoint = Point(x, y);
+        drawing = false;
+        mouseClickRelease_Flag = true;
+    }
+
  
 }
 
@@ -69,17 +89,28 @@ double calculateLength(const Fish f) {
     return totalLength;
 }
 
+double calculateBL(Point p1, Point p2) {
+    double totalLength = 0.0;
+
+        double dx = abs(p1.x - p2.x);
+        double dy = abs(p1.y - p2.y);
+        double length = sqrt(dx * dx + dy * dy);
+       
+    
+    return length;
+}
+
 
 int main()
 {
-    Mat frame, track_frame;
+    Mat frame, track_frame, start_frame;
     VideoCapture cap;
     PointData mouse_pd;
-    //vector <Point> points;
     string filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced.mp4";
     int deviceID = 0, apiID = cv::CAP_FFMPEG;      
     double length;
     int frame_number;
+    double bodylength = 0;
 
     Fish fish;
 
@@ -101,6 +132,7 @@ int main()
    
     //Capture first frame
     cap >> frame;
+    start_frame = frame.clone();
     imshow(filename, frame);
      
     rectangle(frame, Rect(Point(0, 0), Size(50, 100)), BLUE, FILLED);
@@ -109,6 +141,38 @@ int main()
 
     //Set up mouse callback
     setMouseCallback(filename, onMouseClick, &mouse_pd);
+
+    //Measure body length
+    cout << "Meaure BL" << endl;
+    cout << "Press enter to confirm" << endl;
+
+    while (true)
+    {
+        if (drawing) {
+            frame = start_frame.clone();
+            line(frame, startpoint, endpoint, GREEN, 2);
+            imshow(filename, frame);              
+        }
+
+        if (mouseClickRelease_Flag)
+        {
+            cout << "startpoint: " << startpoint << endl;
+            cout << "endpoint: " << endpoint << endl;
+            bodylength = calculateBL(startpoint, endpoint);
+            cout << "Body Length (px): " << bodylength << endl;
+            mouseClickRelease_Flag = false;
+        }
+        
+        char key = waitKey(10);
+        if (key == 27) // Esc key to exit
+            break;
+        if (key == 13) {
+            cout << "BL selected!" << endl;
+            break;
+        } 
+    }
+
+    //Tracking
 
      while (true) 
      {
