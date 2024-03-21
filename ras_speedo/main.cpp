@@ -7,7 +7,14 @@
 #include <opencv2/core.hpp>
 #include <opencv2/video/tracking.hpp>
 
+#define BLACK Scalar(0,0,0)
+#define WHITE Scalar(255,255,255)
+#define GREEN Scalar(0,255,0)
+#define BLUE Scalar(255,0,0)
+#define RED Scalar(0,0,255)
 #define ORANGE Scalar(0,165,255)
+#define RED2 Scalar(0,20,255)
+#define FONT FONT_HERSHEY_PLAIN
 
 #include <stdio.h>
 #include <iostream>
@@ -24,12 +31,21 @@ bool mouseClick_Flag = false;
 class PointData {
     public:
         Point p;
+        int frame;
 };
 
+        
+
+class Fish
+{
+    public:
+        int number;
+        vector <PointData> points;
+
+};
 
 void onMouseClick(int event, int x, int y, int flags, void* userdata) { //function to track mouse movement and click//
-    
-    
+     
     PointData* pd = static_cast<PointData*>(userdata);
 
     if (event == EVENT_LBUTTONDOWN) { //when left button clicked//
@@ -38,17 +54,15 @@ void onMouseClick(int event, int x, int y, int flags, void* userdata) { //functi
         pd->p.x = x;
         pd->p.y = y;
     }
-  
-    
-
-
+ 
 }
 
-double calculateLength(const vector<Point>& points) {
+double calculateLength(const Fish f) {
     double totalLength = 0.0;
-    for (size_t i = 1; i < points.size(); ++i) {
-        double dx = points[i].x - points[i - 1].x;
-        double dy = points[i].y - points[i - 1].y;
+    
+    for (size_t i = 1; i < f.points.size(); ++i) {
+        double dx = f.points[i].p.x - f.points[i - 1].p.x;
+        double dy = f.points[i].p.y - f.points[i - 1].p.y;
         double distance = sqrt(dx * dx + dy * dy);
         totalLength += distance;
     }
@@ -58,70 +72,80 @@ double calculateLength(const vector<Point>& points) {
 
 int main()
 {
-
-     cout << "hello there...";
-
-     waitKey(1);
-
     Mat frame, track_frame;
     VideoCapture cap;
-    int deviceID = 0;             // 0 = open default camera
-    int apiID = cv::CAP_FFMPEG;      // 0 = autodetect default API
+    PointData mouse_pd;
+    //vector <Point> points;
     string filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced.mp4";
-    PointData pd;
-    vector <Point> points;
+    int deviceID = 0, apiID = cv::CAP_FFMPEG;      
     double length;
+    int frame_number;
+
+    Fish fish;
+
+    
     
     // open selected camera using selected API
     cap.open(filename,apiID);
+    
     // check if we succeeded
     if (!cap.isOpened()) {
         cerr << "ERROR! Unable to open video file\n";
         //return -1;
     }
+
+    //Initialize window for unprocessed data
     namedWindow(filename, WINDOW_NORMAL);
     resizeWindow(filename, 1080, 720);
+ 
    
-
+    //Capture first frame
     cap >> frame;
     imshow(filename, frame);
+     
+    rectangle(frame, Rect(Point(0, 0), Size(50, 100)), BLUE, FILLED);
+    putText(frame, "Frame: " + to_string(cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 1, 1);
+    putText(frame, "Time: " + to_string(cap.get(CAP_PROP_POS_MSEC)), Point(10, 30), FONT, 1, WHITE, 1, 1);
 
-    setMouseCallback(filename, onMouseClick, &pd);
+    //Set up mouse callback
+    setMouseCallback(filename, onMouseClick, &mouse_pd);
 
      while (true) 
      {
-         
-         // Read a frame from the video
-         
-         if (mouseClick_Flag)
+         if(mouseClick_Flag)
          {
+             //Read a frame from the video on mouseclick
              mouseClick_Flag = false;
-             imshow(filename, frame);
              cap >> frame;
-             imshow(filename, frame);
-
+            
              // Check if the video has ended
              if (frame.empty()) {
                  std::cout << "End of video." << std::endl;
                  break;
              }
-             //cout << "Left click has been made, Position:(" << pd.p.x << "," << pd.p.y << ")" << endl;
-             points.push_back(pd.p);
-             circle(frame, pd.p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
-             line(frame, pd.p, points[points.size()-2], cv::Scalar(0, 0, 255), 1);
+
+             //Display video data
+             rectangle(frame, Rect(Point(0, 0), Size(200, 50)), BLUE, FILLED);
+             putText(frame, "Frame: " + to_string((int)cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 2, 1);
+             putText(frame, "Time: " + to_string((float)cap.get(CAP_PROP_POS_MSEC)/1000) + "ms", Point(10, 30), FONT, 1, WHITE, 2, 1);
+
+             fish.points.push_back(mouse_pd);
+             circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+             line(frame, fish.points.back().p, fish.points[fish.points.size()-2].p, cv::Scalar(0, 0, 255), 1);
 
              // Draw each point on the frame
-             if (points.size() > 2)
+             if (fish.points.size() > 2)
              {
-                 for (size_t i = 1; i < points.size()-1; ++i) {
-                     cv::circle(frame, points[i], 3, cv::Scalar(0, 0, 255), cv::FILLED);
-                     line(frame, points[i], points[i - 1], cv::Scalar(0, 0, 255), 2);
+                 for (size_t i = 1; i < fish.points.size()-1; ++i) {
+                     cv::circle(frame, fish.points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
+                     line(frame, fish.points[i].p, fish.points[i - 1].p, cv::Scalar(0, 0, 255), 2);
                  }
              }
 
              imshow(filename, frame);
+            
 
-             length = calculateLength(points);
+             length = calculateLength(fish);
 
              cout << "Trace length:" << length << endl;
 
