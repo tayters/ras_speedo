@@ -101,6 +101,14 @@ double calculateBL(Point p1, Point p2) {
 }
 
 
+void updateVideoData(VideoCapture cap, Mat frame)
+{
+    rectangle(frame, Rect(Point(0, 0), Size(200, 50)), BLUE, FILLED);
+    putText(frame, "Frame: " + to_string((int)cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 2, 1);
+    putText(frame, "Time: " + to_string((float)cap.get(CAP_PROP_POS_MSEC) / 1000) + "ms", Point(10, 30), FONT, 1, WHITE, 2, 1);
+
+}
+
 int main()
 {
     Mat frame, track_frame, start_frame;
@@ -133,11 +141,9 @@ int main()
     //Capture first frame
     cap >> frame;
     start_frame = frame.clone();
-    imshow(filename, frame);
+    cv::imshow(filename, frame);
      
-    rectangle(frame, Rect(Point(0, 0), Size(50, 100)), BLUE, FILLED);
-    putText(frame, "Frame: " + to_string(cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 1, 1);
-    putText(frame, "Time: " + to_string(cap.get(CAP_PROP_POS_MSEC)), Point(10, 30), FONT, 1, WHITE, 1, 1);
+    updateVideoData(cap, frame);
 
     //Set up mouse callback
     setMouseCallback(filename, onMouseClick, &mouse_pd);
@@ -151,7 +157,7 @@ int main()
         if (drawing) {
             frame = start_frame.clone();
             line(frame, startpoint, endpoint, GREEN, 2);
-            imshow(filename, frame);              
+            cv::imshow(filename, frame);              
         }
 
         if (mouseClickRelease_Flag)
@@ -178,21 +184,11 @@ int main()
      {
          if(mouseClick_Flag)
          {
-             //Read a frame from the video on mouseclick
              mouseClick_Flag = false;
-             cap >> frame;
-            
-             // Check if the video has ended
-             if (frame.empty()) {
-                 std::cout << "End of video." << std::endl;
-                 break;
-             }
+             
+             updateVideoData(cap, frame);
 
-             //Display video data
-             rectangle(frame, Rect(Point(0, 0), Size(200, 50)), BLUE, FILLED);
-             putText(frame, "Frame: " + to_string((int)cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 2, 1);
-             putText(frame, "Time: " + to_string((float)cap.get(CAP_PROP_POS_MSEC)/1000) + "ms", Point(10, 30), FONT, 1, WHITE, 2, 1);
-
+             mouse_pd.frame = cap.get(CAP_PROP_POS_FRAMES);
              fish.points.push_back(mouse_pd);
              circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
              line(frame, fish.points.back().p, fish.points[fish.points.size()-2].p, cv::Scalar(0, 0, 255), 1);
@@ -206,9 +202,7 @@ int main()
                  }
              }
 
-             imshow(filename, frame);
-            
-
+             cv::imshow(filename, frame);
              length = calculateLength(fish);
 
              cout << "Trace length:" << length << endl;
@@ -223,6 +217,49 @@ int main()
             cout << "Video playback terminated by user." << std::endl;
              break;
          }
+
+         if ((key == 46) || (key == 44))
+         {
+             cap >> frame;
+
+             if (key == 44)
+             {
+                 if (key == 44)
+                 {
+                     int tmp = cap.get(CAP_PROP_POS_FRAMES);
+                     cap.set(CAP_PROP_POS_FRAMES, tmp - 3);
+                 }
+             }
+
+             cap >> frame;
+
+             // Check if the video has ended
+             if (frame.empty()) {
+                 std::cout << "End of video." << std::endl;
+                 break;
+             }
+                        
+             updateVideoData(cap, frame);
+
+             circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+             line(frame, fish.points.back().p, fish.points[fish.points.size() - 2].p, cv::Scalar(0, 0, 255), 1);
+
+             // Draw each point on the frame
+             if (fish.points.size() > 2)
+             {
+                 for (size_t i = 1; i < fish.points.size() - 1; ++i) {
+                     cv::circle(frame, fish.points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
+                     line(frame, fish.points[i].p, fish.points[i - 1].p, cv::Scalar(0, 0, 255), 2);
+                 }
+             }
+             
+             
+             cv::imshow(filename, frame);
+
+         }
+
+         
+
      }
 
      // Release the video capture object and close the window
