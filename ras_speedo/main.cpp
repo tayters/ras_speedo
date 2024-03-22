@@ -31,25 +31,33 @@ bool mouseClickRelease_Flag = false;
 Point startpoint, endpoint;
 bool drawing = false;
 
-
 class PointData {
     public:
         Point p;
         int frame;
 };
-
-        
+     
 
 class Fish
 {
     public:
         int number;
         vector <PointData> points;
+        
+        
+        void drawPath(Mat frame) {
+
+            if (points.size() > 2)
+            {
+                for (size_t i = 1; i < points.size() - 1; ++i) {
+                    cv::circle(frame, points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
+                    line(frame, points[i].p, points[i - 1].p, cv::Scalar(0, 0, 255), 2);
+                }
+            }
+
+        }
 
 };
-
-
-
 
 
 void onMouseClick(int event, int x, int y, int flags, void* userdata) { //function to track mouse movement and click//
@@ -99,7 +107,6 @@ double calculateBL(Point p1, Point p2) {
     
     return length;
 }
-
 
 void updateVideoData(VideoCapture cap, Mat frame)
 {
@@ -174,6 +181,7 @@ int main()
             break;
         if (key == 13) {
             cout << "BL selected!" << endl;
+            mouseClick_Flag = false;
             break;
         } 
     }
@@ -190,17 +198,21 @@ int main()
 
              mouse_pd.frame = cap.get(CAP_PROP_POS_FRAMES);
              fish.points.push_back(mouse_pd);
-             circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
-             line(frame, fish.points.back().p, fish.points[fish.points.size()-2].p, cv::Scalar(0, 0, 255), 1);
 
+
+             circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+             if (fish.points.size() > 1)
+             {
+                 line(frame, fish.points.back().p, fish.points[fish.points.size() - 2].p, cv::Scalar(0, 0, 255), 2);
+             }
              // Draw each point on the frame
-             if (fish.points.size() > 2)
+             /*if (fish.points.size() > 2)
              {
                  for (size_t i = 1; i < fish.points.size()-1; ++i) {
                      cv::circle(frame, fish.points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
                      line(frame, fish.points[i].p, fish.points[i - 1].p, cv::Scalar(0, 0, 255), 2);
                  }
-             }
+             }*/
 
              cv::imshow(filename, frame);
              length = calculateLength(fish);
@@ -218,6 +230,8 @@ int main()
              break;
          }
 
+
+         //Frame step forward or backwards
          if ((key == 46) || (key == 44))
          {
              cap >> frame;
@@ -241,13 +255,15 @@ int main()
                         
              updateVideoData(cap, frame);
 
-             circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
-             line(frame, fish.points.back().p, fish.points[fish.points.size() - 2].p, cv::Scalar(0, 0, 255), 1);
+             //circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+             //line(frame, fish.points.back().p, fish.points[fish.points.size() - 2].p, cv::Scalar(0, 0, 255), 2);
 
-             // Draw each point on the frame
-             if (fish.points.size() > 2)
+             //circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+             //Draw each point on the frame
+             if (fish.points.size() > 0)
              {
-                 for (size_t i = 1; i < fish.points.size() - 1; ++i) {
+                 circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+                 for (size_t i = 1; i < fish.points.size(); ++i) {
                      cv::circle(frame, fish.points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
                      line(frame, fish.points[i].p, fish.points[i - 1].p, cv::Scalar(0, 0, 255), 2);
                  }
