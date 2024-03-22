@@ -202,39 +202,26 @@ int main()
              fish.points.push_back(mouse_pd);
 
              fish.drawPath(frame);
-                     
-
              imshow(filename, frame);
+             
              length = calculateLength(fish);
-
              cout << "Trace length:" << length << endl;
 
 
          }
+
          // Wait for a key press (30 milliseconds delay)
          int key = waitKey(30);
-
-         // Break the loop if 'Esc' key is pressed
-         if (key == 27) {
-            cout << "Video playback terminated by user." << std::endl;
-             break;
-         }
-
 
          //Frame step forward or backwards
          if ((key == 46) || (key == 44))
          {
-             cap >> frame;
-
              if (key == 44)
              {
-                 if (key == 44)
-                 {
-                     int tmp = cap.get(CAP_PROP_POS_FRAMES);
-                     cap.set(CAP_PROP_POS_FRAMES, tmp - 3);
-                 }
+                int tmp = cap.get(CAP_PROP_POS_FRAMES);
+                cap.set(CAP_PROP_POS_FRAMES, tmp - 2);
              }
-
+             
              cap >> frame;
 
              // Check if the video has ended
@@ -244,13 +231,15 @@ int main()
              }
                         
              updateVideoData(cap, frame);
-
              fish.drawPath(frame);
-                        
              imshow(filename, frame);
-
          }
 
+         // Break the loop if 'Esc' key is pressed
+         if (key == 27) {
+             cout << "Video playback terminated by user." << std::endl;
+             break;
+         }
          
 
      }
