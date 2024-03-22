@@ -47,13 +47,15 @@ class Fish
         
         void drawPath(Mat frame) {
 
-            if (points.size() > 2)
+            if (points.size() > 0)
             {
-                for (size_t i = 1; i < points.size() - 1; ++i) {
-                    cv::circle(frame, points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
+                circle(frame, points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+                for (size_t i = 1; i < points.size(); ++i) {
+                    circle(frame, points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
                     line(frame, points[i].p, points[i - 1].p, cv::Scalar(0, 0, 255), 2);
                 }
             }
+
 
         }
 
@@ -199,22 +201,10 @@ int main()
              mouse_pd.frame = cap.get(CAP_PROP_POS_FRAMES);
              fish.points.push_back(mouse_pd);
 
+             fish.drawPath(frame);
+                     
 
-             circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
-             if (fish.points.size() > 1)
-             {
-                 line(frame, fish.points.back().p, fish.points[fish.points.size() - 2].p, cv::Scalar(0, 0, 255), 2);
-             }
-             // Draw each point on the frame
-             /*if (fish.points.size() > 2)
-             {
-                 for (size_t i = 1; i < fish.points.size()-1; ++i) {
-                     cv::circle(frame, fish.points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
-                     line(frame, fish.points[i].p, fish.points[i - 1].p, cv::Scalar(0, 0, 255), 2);
-                 }
-             }*/
-
-             cv::imshow(filename, frame);
+             imshow(filename, frame);
              length = calculateLength(fish);
 
              cout << "Trace length:" << length << endl;
@@ -255,22 +245,9 @@ int main()
                         
              updateVideoData(cap, frame);
 
-             //circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
-             //line(frame, fish.points.back().p, fish.points[fish.points.size() - 2].p, cv::Scalar(0, 0, 255), 2);
-
-             //circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
-             //Draw each point on the frame
-             if (fish.points.size() > 0)
-             {
-                 circle(frame, fish.points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
-                 for (size_t i = 1; i < fish.points.size(); ++i) {
-                     cv::circle(frame, fish.points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
-                     line(frame, fish.points[i].p, fish.points[i - 1].p, cv::Scalar(0, 0, 255), 2);
-                 }
-             }
-             
-             
-             cv::imshow(filename, frame);
+             fish.drawPath(frame);
+                        
+             imshow(filename, frame);
 
          }
 
