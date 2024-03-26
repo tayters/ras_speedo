@@ -7,14 +7,25 @@
 #include <opencv2/core.hpp>
 #include <opencv2/video/tracking.hpp>
 
-#define BLACK Scalar(0,0,0)
-#define WHITE Scalar(255,255,255)
-#define GREEN Scalar(0,255,0)
-#define BLUE Scalar(255,0,0)
+
 #define RED Scalar(0,0,255)
 #define ORANGE Scalar(0,165,255)
-#define RED2 Scalar(0,20,255)
-#define FONT FONT_HERSHEY_PLAIN
+#define YELLOW Scalar(0,255,255)
+#define GREEN Scalar(0,255,0)
+#define BLUE Scalar(255,0,0)
+#define CYAN Scalar(255,255,0)
+#define PURPLE Scalar(255,0,255)
+#define BGREEN Scalar(50,200,0)
+#define PRED Scalar(155,0,255)
+#define WHITE Scalar(255,255,255)
+#define BLACK Scalar(0,0,0)
+
+#define GREEN Scalar(0,255,0)
+
+
+#define ORANGE Scalar(0,165,255)
+#define RED2 Scalar(0,0,255)
+#define FONT FONT_HERSHEY_PLAIN 
 
 
 #include <stdio.h>
@@ -27,7 +38,7 @@ using std::endl;
 using namespace cv;
 using namespace std;
 
-vector <Scalar> colours {RED, ORANGE, BLUE, GREEN, RED2, Scalar(200,200,0), Scalar(200, 200, 0), Scalar(20, 200, 0), Scalar(0, 50, 240), Scalar(0, 200, 100)};
+vector <Scalar> colours {RED, ORANGE, YELLOW, GREEN, BLUE, CYAN, PURPLE, BGREEN, PRED, WHITE};
 bool mouseClick_Flag = false;
 bool mouseClickRelease_Flag = false;
 Point startpoint, endpoint;
@@ -122,6 +133,12 @@ void updateVideoData(VideoCapture cap, Mat frame, int n, Scalar c)
     putText(frame, "Frame: " + to_string((int)cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 2, 1);
     putText(frame, "Time: " + to_string((float)cap.get(CAP_PROP_POS_MSEC) / 1000) + "ms", Point(10, 30), FONT, 1, WHITE, 2, 1);
     putText(frame, "FISH: " + to_string(n), Point(10, 45), FONT, 1, c, 2, 1);
+
+    /*for (int i = 0; i < 10; i++)
+    {
+        rectangle(frame, Rect(Point(100, i * 10), Size(10, 10)), colours[i], FILLED);
+    };*/
+    
 
 }
 
