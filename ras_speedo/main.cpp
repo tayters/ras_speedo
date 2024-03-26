@@ -34,8 +34,6 @@ Point startpoint, endpoint;
 bool drawing = false;
 
 
-
-
 class PointData {
     public:
         Point p;
@@ -120,11 +118,12 @@ double calculateBL(Point p1, Point p2) {
     return length;
 }
 
-void updateVideoData(VideoCapture cap, Mat frame)
+void updateVideoData(VideoCapture cap, Mat frame, int n, Scalar c)
 {
-    rectangle(frame, Rect(Point(0, 0), Size(200, 50)), BLUE, FILLED);
+    rectangle(frame, Rect(Point(0, 0), Size(200, 80)), BLUE, FILLED);
     putText(frame, "Frame: " + to_string((int)cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 2, 1);
     putText(frame, "Time: " + to_string((float)cap.get(CAP_PROP_POS_MSEC) / 1000) + "ms", Point(10, 30), FONT, 1, WHITE, 2, 1);
+    putText(frame, "FISH: " + to_string(n), Point(10, 45), FONT, 1, c, 2, 1);
 
 }
 
@@ -170,7 +169,7 @@ int main()
     start_frame = frame.clone();
     cv::imshow(filename, frame);
      
-    updateVideoData(cap, frame);
+    updateVideoData(cap, frame, n, school[n].path_colour);
 
     //Set up mouse callback
     setMouseCallback(filename, onMouseClick, &mouse_pd);
@@ -216,7 +215,7 @@ int main()
          {
              mouseClick_Flag = false;
              
-             updateVideoData(cap, frame);
+             updateVideoData(cap, frame, n, school[n].path_colour);
 
              mouse_pd.frame = cap.get(CAP_PROP_POS_FRAMES);
              //fish.points.push_back(mouse_pd);
@@ -251,7 +250,7 @@ int main()
                  break;
              }
                         
-             updateVideoData(cap, frame);
+             updateVideoData(cap, frame, n, school[n].path_colour);
              //fish.drawPath(frame);
              school[n].drawPath(frame);
              imshow(filename, frame);
@@ -266,6 +265,12 @@ int main()
          if ((key >= 48) && (key < 58)) {
              n = key - 48;
              cout << n << " was pressed!" << endl;
+             
+
+             //cap.set(CAP_PROP_POS_FRAMES, frame_number - 1);
+             //cap >> frame;
+             updateVideoData(cap, frame, n, school[n].path_colour);
+             imshow(filename, frame);
          }
 
      }
