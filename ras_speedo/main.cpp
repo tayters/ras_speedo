@@ -16,6 +16,7 @@
 #define RED2 Scalar(0,20,255)
 #define FONT FONT_HERSHEY_PLAIN
 
+
 #include <stdio.h>
 #include <iostream>
 
@@ -26,10 +27,14 @@ using std::endl;
 using namespace cv;
 using namespace std;
 
+vector <Scalar> colours {RED, ORANGE, BLUE, GREEN, RED2, Scalar(200,200,0), Scalar(200, 200, 0), Scalar(20, 200, 0), Scalar(0, 50, 240), Scalar(0, 200, 100)};
 bool mouseClick_Flag = false;
 bool mouseClickRelease_Flag = false;
 Point startpoint, endpoint;
 bool drawing = false;
+
+
+
 
 class PointData {
     public:
@@ -43,7 +48,7 @@ class Fish
     public:
         int index;
         vector <PointData> points;
-        Scalar path_colour = RED;
+        Scalar path_colour;
         
         void drawPath(Mat frame) {
 
@@ -60,8 +65,9 @@ class Fish
         }
 
         //Constructor
-        Fish(int i){
+        Fish(int i, Scalar s){
             index = 1;
+            path_colour = s;
         }
 };
 
@@ -130,11 +136,20 @@ int main()
     string filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced.mp4";
     int deviceID = 0, apiID = cv::CAP_FFMPEG;      
     double length;
-    int frame_number, n = 0;
+    int frame_number, n = 5;
     double bodylength = 0;
-
-    Fish fish(0);
+   
+    //Fish fish(0);
     vector <Fish> school;
+
+    //school.push_back(Fish(n));
+
+    //construct school of fish
+    for (int i = 0; i < 10; i++)
+    {
+        school.push_back(Fish(i, colours[i]));
+    };
+    
     
     // open selected camera using selected API
     cap.open(filename,apiID);
@@ -204,12 +219,14 @@ int main()
              updateVideoData(cap, frame);
 
              mouse_pd.frame = cap.get(CAP_PROP_POS_FRAMES);
-             fish.points.push_back(mouse_pd);
+             //fish.points.push_back(mouse_pd);
+             school[n].points.push_back(mouse_pd);
 
-             fish.drawPath(frame);
+             //fish.drawPath(frame);
+             school[n].drawPath(frame);
              imshow(filename, frame);
              
-             length = calculateLength(fish);
+             length = calculateLength(school[n]);
              cout << "Trace length:" << length << endl;
 
          }
@@ -235,7 +252,8 @@ int main()
              }
                         
              updateVideoData(cap, frame);
-             fish.drawPath(frame);
+             //fish.drawPath(frame);
+             school[n].drawPath(frame);
              imshow(filename, frame);
          }
 
@@ -245,7 +263,7 @@ int main()
              break;
          }
          
-         if (key > 0x29 && key < 0x40) {
+         if ((key >= 48) && (key < 58)) {
              n = key - 48;
              cout << n << " was pressed!" << endl;
          }
