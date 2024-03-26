@@ -58,9 +58,7 @@ class Fish
                     line(frame, points[i].p, points[i - 1].p, path_colour, 2);
                 }
             }
-
-
-        }
+           }
 
         //Constructor
         Fish(int i, Scalar s){
@@ -138,17 +136,13 @@ int main()
     int frame_number, n = 5;
     double bodylength = 0;
    
-    //Fish fish(0);
     vector <Fish> school;
-
-    //school.push_back(Fish(n));
 
     //construct school of fish
     for (int i = 0; i < 10; i++)
     {
         school.push_back(Fish(i, colours[i]));
     };
-    
     
     // open selected camera using selected API
     cap.open(filename,apiID);
@@ -163,11 +157,10 @@ int main()
     namedWindow(filename, WINDOW_NORMAL);
     resizeWindow(filename, 1080, 720);
  
-   
     //Capture first frame
     cap >> frame;
     start_frame = frame.clone();
-    cv::imshow(filename, frame);
+    imshow(filename, frame);
      
     updateVideoData(cap, frame, n, school[n].path_colour);
 
@@ -218,10 +211,8 @@ int main()
              updateVideoData(cap, frame, n, school[n].path_colour);
 
              mouse_pd.frame = cap.get(CAP_PROP_POS_FRAMES);
-             //fish.points.push_back(mouse_pd);
              school[n].points.push_back(mouse_pd);
 
-             //fish.drawPath(frame);
              school[n].drawPath(frame);
              imshow(filename, frame);
              
@@ -251,7 +242,6 @@ int main()
              }
                         
              updateVideoData(cap, frame, n, school[n].path_colour);
-             //fish.drawPath(frame);
              school[n].drawPath(frame);
              imshow(filename, frame);
          }
@@ -265,11 +255,13 @@ int main()
          if ((key >= 48) && (key < 58)) {
              n = key - 48;
              cout << n << " was pressed!" << endl;
+                          
+             int tmp = cap.get(CAP_PROP_POS_FRAMES);
+             cap.set(CAP_PROP_POS_FRAMES, tmp - 1);
+             cap >> frame;
              
-
-             //cap.set(CAP_PROP_POS_FRAMES, frame_number - 1);
-             //cap >> frame;
              updateVideoData(cap, frame, n, school[n].path_colour);
+             school[n].drawPath(frame);
              imshow(filename, frame);
          }
 
