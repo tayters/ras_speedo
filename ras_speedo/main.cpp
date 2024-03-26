@@ -41,24 +41,28 @@ class PointData {
 class Fish
 {
     public:
-        int number;
+        int index;
         vector <PointData> points;
-        
+        Scalar path_colour = RED;
         
         void drawPath(Mat frame) {
 
             if (points.size() > 0)
             {
-                circle(frame, points.back().p, 2, cv::Scalar(0, 0, 255), cv::FILLED);
+                circle(frame, points.back().p, 2, path_colour, cv::FILLED);
                 for (size_t i = 1; i < points.size(); ++i) {
-                    circle(frame, points[i].p, 3, cv::Scalar(0, 0, 255), cv::FILLED);
-                    line(frame, points[i].p, points[i - 1].p, cv::Scalar(0, 0, 255), 2);
+                    circle(frame, points[i].p, 3, path_colour, cv::FILLED);
+                    line(frame, points[i].p, points[i - 1].p, path_colour, 2);
                 }
             }
 
 
         }
 
+        //Constructor
+        Fish(int i){
+            index = 1;
+        }
 };
 
 
@@ -126,12 +130,11 @@ int main()
     string filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced.mp4";
     int deviceID = 0, apiID = cv::CAP_FFMPEG;      
     double length;
-    int frame_number;
+    int frame_number, n = 0;
     double bodylength = 0;
 
-    Fish fish;
-
-    
+    Fish fish(0);
+    vector <Fish> school;
     
     // open selected camera using selected API
     cap.open(filename,apiID);
@@ -158,6 +161,7 @@ int main()
     setMouseCallback(filename, onMouseClick, &mouse_pd);
 
     //Measure body length
+    /*
     cout << "Meaure BL" << endl;
     cout << "Press enter to confirm" << endl;
 
@@ -187,6 +191,7 @@ int main()
             break;
         } 
     }
+    */
 
     //Tracking
 
@@ -206,7 +211,6 @@ int main()
              
              length = calculateLength(fish);
              cout << "Trace length:" << length << endl;
-
 
          }
 
@@ -241,6 +245,10 @@ int main()
              break;
          }
          
+         if (key > 0x29 && key < 0x40) {
+             n = key - 48;
+             cout << n << " was pressed!" << endl;
+         }
 
      }
 
@@ -248,11 +256,8 @@ int main()
      cap.release();
      destroyAllWindows();
      
-
-
      return 0;
-
-   
+        
 }
 
 
