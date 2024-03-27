@@ -50,8 +50,7 @@ class PointData {
         Point p;
         int frame;
 };
-     
-
+ 
 class Fish
 {
     public:
@@ -147,7 +146,7 @@ int main()
     Mat frame, track_frame, start_frame;
     VideoCapture cap;
     PointData mouse_pd;
-    string filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced.mp4";
+    string filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced.mp4", input_file;
     int deviceID = 0, apiID = cv::CAP_FFMPEG;      
     double length;
     int frame_number, n = 5;
@@ -155,6 +154,9 @@ int main()
    
     vector <Fish> school;
 
+    cout << "Enter file path:";
+    cin >> filename;
+    
     //construct school of fish
     for (int i = 0; i < 10; i++)
     {
