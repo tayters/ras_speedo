@@ -57,6 +57,41 @@ class Fish
         int index;
         vector <PointData> points;
         Scalar path_colour;
+
+       
+
+        void addPoint(PointData pd)
+        {
+            if (points.size() > 0)
+            {
+
+                for (int i = 0; i < points.size(); i++)
+                {
+                    //replace if existing
+                    if (points[i].frame == pd.frame)
+                    {
+                        points[i] = pd;
+                        break;
+                    }
+                    else if (points[i].frame > pd.frame)
+                    {
+                        points.insert(points.begin() + i, pd);
+                        break;
+                    }
+                    else if (i == points.size() - 1)
+                    {
+                        points.push_back(pd);
+                        
+                    }
+                }
+            }
+            else
+            {
+                points.push_back(pd);
+            }
+
+            
+        }
         
         void drawPath(Mat frame) {
 
@@ -68,7 +103,7 @@ class Fish
                     line(frame, points[i].p, points[i - 1].p, path_colour, 2);
                 }
             }
-           }
+         }
 
         //Constructor
         Fish(int i, Scalar s){
@@ -224,7 +259,7 @@ int main()
 
              mouse_pd.frame = cap.get(CAP_PROP_POS_FRAMES);
              
-             school[n].points.push_back(mouse_pd);
+             school[n].addPoint(mouse_pd);
              
              school[n].drawPath(out_frame);
              imshow(filename, out_frame);
@@ -295,7 +330,7 @@ int main()
          // Delete path for current animal
          if (key == 100) //d
          {
-             cout << "delete was pressed!" << endl;
+             cout << "Path for fish " << n << "deleted" << endl;
              school[n].points.clear();
              
              src.copyTo(out_frame);
