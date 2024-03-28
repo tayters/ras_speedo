@@ -93,15 +93,23 @@ class Fish
             
         }
         
-        void drawPath(Mat frame) {
+        void drawPath(Mat frame, int frame_number) {
 
             if (points.size() > 0)
             {
-                circle(frame, points.back().p, 2, path_colour, cv::FILLED);
+                
+                //circle(frame, points.back().p, 2, path_colour, cv::FILLED);
                 for (size_t i = 1; i < points.size(); ++i) {
+                    
+                    if (points[i].frame > frame_number)
+                        break;
+
+                    
                     circle(frame, points[i].p, 3, path_colour, cv::FILLED);
                     line(frame, points[i].p, points[i - 1].p, path_colour, 2);
+                    
                 }
+                
             }
          }
 
@@ -261,7 +269,7 @@ int main()
              
              school[n].addPoint(mouse_pd);
              
-             school[n].drawPath(out_frame);
+             school[n].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
              imshow(filename, out_frame);
              
              length = calculateLength(school[n]);
@@ -296,12 +304,12 @@ int main()
              {
                  for (int i = 0; i < 10; i++)
                  {
-                     school[i].drawPath(out_frame);
+                     school[i].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
                  }
              }
              else 
              {
-                 school[n].drawPath(out_frame);
+                 school[n].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
              }
              imshow(filename, out_frame);
          }
@@ -323,7 +331,7 @@ int main()
              
              src.copyTo(out_frame);
              updateVideoData(cap, out_frame, n, school[n].path_colour);
-             school[n].drawPath(out_frame);
+             school[n].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
              imshow(filename, out_frame);
          }
 
@@ -351,13 +359,13 @@ int main()
              {
                  for (int i = 0; i < 10; i++)
                  {
-                     school[i].drawPath(out_frame);
+                     school[i].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
                  }
                  cout << "All paths" << endl;
              }
              else
              {
-                 school[n].drawPath(out_frame);
+                 school[n].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
                  cout << "One path" << endl;
              }
              imshow(filename, out_frame);
