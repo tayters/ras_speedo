@@ -41,9 +41,9 @@ using namespace std;
 vector <Scalar> colours {RED, ORANGE, YELLOW, GREEN, BLUE, CYAN, PURPLE, BGREEN, PRED, WHITE};
 bool mouseClick_Flag = false;
 bool mouseClickRelease_Flag = false;
+bool showAllPaths_Flag = false;
 Point startpoint, endpoint;
 bool drawing = false;
-
 
 class PointData {
     public:
@@ -76,7 +76,6 @@ class Fish
             path_colour = s;
         }
 };
-
 
 void onMouseClick(int event, int x, int y, int flags, void* userdata) { //function to track mouse movement and click//
      
@@ -132,18 +131,11 @@ void updateVideoData(VideoCapture cap, Mat frame, int n, Scalar c)
     putText(frame, "Frame: " + to_string((int)cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 2, 1);
     putText(frame, "Time: " + to_string((float)cap.get(CAP_PROP_POS_MSEC) / 1000) + "ms", Point(10, 30), FONT, 1, WHITE, 2, 1);
     putText(frame, "FISH: " + to_string(n), Point(10, 45), FONT, 1, c, 2, 1);
-
-    /*for (int i = 0; i < 10; i++)
-    {
-        rectangle(frame, Rect(Point(100, i * 10), Size(10, 10)), colours[i], FILLED);
-    };*/
-    
-
 }
 
 int main()
 {
-    Mat frame, track_frame, start_frame;
+    Mat src, out_frame, start_frame;
     VideoCapture cap;
     PointData mouse_pd;
     string filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced.mp4", input_file;
@@ -154,8 +146,8 @@ int main()
    
     vector <Fish> school;
 
-    cout << "Enter file path:";
-    cin >> filename;
+    //cout << "Enter file path:";
+    //cin >> filename;
     
     //construct school of fish
     for (int i = 0; i < 10; i++)
@@ -176,27 +168,27 @@ int main()
     namedWindow(filename, WINDOW_NORMAL);
     resizeWindow(filename, 1080, 720);
  
-    //Capture first frame
-    cap >> frame;
-    start_frame = frame.clone();
-    imshow(filename, frame);
+    //Capture first src
+    cap >> src;
+    start_frame = src.clone();
+    imshow(filename, src);
      
-    updateVideoData(cap, frame, n, school[n].path_colour);
+    updateVideoData(cap, src, n, school[n].path_colour);
 
     //Set up mouse callback
     setMouseCallback(filename, onMouseClick, &mouse_pd);
 
     //Measure body length
     /*
-    cout << "Meaure BL" << endl;
+    cout << "Click to Measure BL" << endl;
     cout << "Press enter to confirm" << endl;
 
     while (true)
     {
         if (drawing) {
-            frame = start_frame.clone();
-            line(frame, startpoint, endpoint, GREEN, 2);
-            cv::imshow(filename, frame);              
+            src = start_frame.clone();
+            line(src, startpoint, endpoint, GREEN, 2);
+            cv::imshow(filename, src);              
         }
 
         if (mouseClickRelease_Flag)
@@ -227,13 +219,15 @@ int main()
          {
              mouseClick_Flag = false;
              
-             updateVideoData(cap, frame, n, school[n].path_colour);
+             src.copyTo(out_frame);
+             updateVideoData(cap, out_frame, n, school[n].path_colour);
 
              mouse_pd.frame = cap.get(CAP_PROP_POS_FRAMES);
+             
              school[n].points.push_back(mouse_pd);
-
-             school[n].drawPath(frame);
-             imshow(filename, frame);
+             
+             school[n].drawPath(out_frame);
+             imshow(filename, out_frame);
              
              length = calculateLength(school[n]);
              cout << "Trace length:" << length << endl;
@@ -248,21 +242,33 @@ int main()
          {
              if (key == 44)
              {
+                //go back one frame
                 int tmp = cap.get(CAP_PROP_POS_FRAMES);
                 cap.set(CAP_PROP_POS_FRAMES, tmp - 2);
              }
              
-             cap >> frame;
+             cap >> src;
 
              // Check if the video has ended
-             if (frame.empty()) {
+             if (src.empty()) {
                  std::cout << "End of video." << std::endl;
                  break;
              }
-                        
-             updateVideoData(cap, frame, n, school[n].path_colour);
-             school[n].drawPath(frame);
-             imshow(filename, frame);
+             
+             src.copyTo(out_frame);
+             updateVideoData(cap, out_frame, n, school[n].path_colour);
+             if (showAllPaths_Flag)
+             {
+                 for (int i = 0; i < 10; i++)
+                 {
+                     school[i].drawPath(out_frame);
+                 }
+             }
+             else 
+             {
+                 school[n].drawPath(out_frame);
+             }
+             imshow(filename, out_frame);
          }
 
          // Break the loop if 'Esc' key is pressed
@@ -271,17 +277,57 @@ int main()
              break;
          }
          
+         //Switch between animals
          if ((key >= 48) && (key < 58)) {
              n = key - 48;
-             cout << n << " was pressed!" << endl;
+             cout << "Tracking switched to fish:" << n << endl;
                           
              int tmp = cap.get(CAP_PROP_POS_FRAMES);
              cap.set(CAP_PROP_POS_FRAMES, tmp - 1);
-             cap >> frame;
+             cap >> src;
              
-             updateVideoData(cap, frame, n, school[n].path_colour);
-             school[n].drawPath(frame);
-             imshow(filename, frame);
+             src.copyTo(out_frame);
+             updateVideoData(cap, out_frame, n, school[n].path_colour);
+             school[n].drawPath(out_frame);
+             imshow(filename, out_frame);
+         }
+
+         // Delete path for current animal
+         if (key == 100) //d
+         {
+             cout << "delete was pressed!" << endl;
+             school[n].points.clear();
+             
+             src.copyTo(out_frame);
+             updateVideoData(cap, out_frame, n, school[n].path_colour);
+             imshow(filename, out_frame);
+
+         }
+
+         if (key == 115) //s
+         {
+             cout << "s was pressed!" << endl;
+             showAllPaths_Flag = !showAllPaths_Flag;
+
+             src.copyTo(out_frame);
+             updateVideoData(cap, out_frame, n, school[n].path_colour);
+
+             if (showAllPaths_Flag)
+             {
+                 for (int i = 0; i < 10; i++)
+                 {
+                     school[i].drawPath(out_frame);
+                 }
+                 cout << "All paths" << endl;
+             }
+             else
+             {
+                 school[n].drawPath(out_frame);
+                 cout << "One path" << endl;
+             }
+             imshow(filename, out_frame);
+         
+
          }
 
      }
