@@ -5,7 +5,10 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/core.hpp>
-#include <opencv2/video/tracking.hpp>
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+
 
 
 #define RED Scalar(0,0,255)
@@ -19,17 +22,9 @@
 #define PRED Scalar(155,0,255)
 #define WHITE Scalar(255,255,255)
 #define BLACK Scalar(0,0,0)
-
-#define GREEN Scalar(0,255,0)
-
-
-#define ORANGE Scalar(0,165,255)
-#define RED2 Scalar(0,0,255)
 #define FONT FONT_HERSHEY_PLAIN 
 
 
-#include <stdio.h>
-#include <iostream>
 
 using std::cin;
 using std::cout;
@@ -57,8 +52,7 @@ class Fish
         int index;
         vector <PointData> points;
         Scalar path_colour;
-
-       
+               
 
         void addPoint(PointData pd)
         {
@@ -95,16 +89,18 @@ class Fish
         
         void drawPath(Mat frame, int frame_number) {
 
-            if (points.size() > 0)
+            if (points.size() == 1)
             {
-                
-                //circle(frame, points.back().p, 2, path_colour, cv::FILLED);
+                circle(frame, points.back().p, 2, path_colour, cv::FILLED);
+            }
+            else if (points.size() > 0)
+            {
+                                
                 for (size_t i = 1; i < points.size(); ++i) {
                     
                     if (points[i].frame > frame_number)
                         break;
-
-                    
+                                        
                     circle(frame, points[i].p, 3, path_colour, cv::FILLED);
                     line(frame, points[i].p, points[i - 1].p, path_colour, 2);
                     
@@ -145,7 +141,7 @@ void onMouseClick(int event, int x, int y, int flags, void* userdata) { //functi
  
 }
 
-double calculateLength(const Fish f) {
+double calculatePathLength(const Fish f) {
     double totalLength = 0.0;
     
     for (size_t i = 1; i < f.points.size(); ++i) {
@@ -157,14 +153,12 @@ double calculateLength(const Fish f) {
     return totalLength;
 }
 
-double calculateBL(Point p1, Point p2) {
-    double totalLength = 0.0;
-
-        double dx = abs(p1.x - p2.x);
-        double dy = abs(p1.y - p2.y);
-        double length = sqrt(dx * dx + dy * dy);
-       
-    
+double calculateBL(Point p1, Point p2)
+{
+    double dx = abs(p1.x - p2.x);
+    double dy = abs(p1.y - p2.y);
+    double length = sqrt(dx * dx + dy * dy);
+        
     return length;
 }
 
@@ -181,7 +175,9 @@ int main()
     Mat src, out_frame, start_frame;
     VideoCapture cap;
     PointData mouse_pd;
+    ofstream outFile;
     string filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced.mp4", input_file;
+    string out_filename;
     int deviceID = 0, apiID = cv::CAP_FFMPEG;      
     double length;
     int frame_number, n = 5;
@@ -191,6 +187,7 @@ int main()
 
     //cout << "Enter file path:";
     //cin >> filename;
+    out_filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced_test.txt";
     
     //construct school of fish
     for (int i = 0; i < 10; i++)
@@ -255,7 +252,6 @@ int main()
     */
 
     //Tracking
-
      while (true) 
      {
          if(mouseClick_Flag)
@@ -268,12 +264,11 @@ int main()
              mouse_pd.frame = cap.get(CAP_PROP_POS_FRAMES);
              
              school[n].addPoint(mouse_pd);
-             
              school[n].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
              imshow(filename, out_frame);
              
-             length = calculateLength(school[n]);
-             cout << "Trace length:" << length << endl;
+             length = calculatePathLength(school[n]);
+             //cout << "Trace length:" << length << endl;
 
          }
 
@@ -370,6 +365,24 @@ int main()
              }
              imshow(filename, out_frame);
          
+         }
+
+         if (key == 119) //w
+         {
+             
+             //Write to file
+             outFile.open(out_filename);
+
+             // Check if the file is opened successfully
+             if (!outFile) {
+                 cout << "Error: Couldn't open the file!" << endl;
+             }
+
+             outFile << "test";
+
+             outFile.close();
+                          
+             cout << "Wrote to file!" << endl;
 
          }
 
