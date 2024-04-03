@@ -9,8 +9,6 @@
 #include <iostream>
 #include <fstream>
 
-
-
 #define RED Scalar(0,0,255)
 #define ORANGE Scalar(0,165,255)
 #define YELLOW Scalar(0,255,255)
@@ -23,8 +21,6 @@
 #define WHITE Scalar(255,255,255)
 #define BLACK Scalar(0,0,0)
 #define FONT FONT_HERSHEY_PLAIN 
-
-
 
 using std::cin;
 using std::cout;
@@ -196,6 +192,7 @@ double calculateBL(Point p1, Point p2)
 void updateVideoData(VideoCapture cap, Mat frame, int n, Scalar c)
 {
     rectangle(frame, Rect(Point(0, 0), Size(200, 80)), BLUE, FILLED);
+    line(frame, Point(540,0),Point(540,720), WHITE, 1.5);
     putText(frame, "Frame: " + to_string((int)cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 2, 1);
     putText(frame, "Time: " + to_string((float)cap.get(CAP_PROP_POS_MSEC) / 1000) + "ms", Point(10, 30), FONT, 1, WHITE, 2, 1);
     putText(frame, "FISH: " + to_string(n), Point(10, 45), FONT, 1, c, 2, 1);
