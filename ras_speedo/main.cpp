@@ -15,7 +15,7 @@
 #define ORANGE Scalar(0,165,255)
 #define YELLOW Scalar(0,255,255)
 #define GREEN Scalar(0,255,0)
-#define BLUE Scalar(255,0,0)
+#define BLUE Scalar(200,0,0)
 #define CYAN Scalar(255,255,0)
 #define PURPLE Scalar(255,0,255)
 #define BGREEN Scalar(50,200,0)
@@ -52,7 +52,7 @@ class Fish
         int index;
         vector <PointData> points;
         Scalar path_colour;
-               
+                     
 
         void addPoint(PointData pd)
         {
@@ -109,6 +109,8 @@ class Fish
             }
          }
 
+
+        
         //Constructor
         Fish(int i, Scalar s){
             index = 1;
@@ -170,6 +172,59 @@ void updateVideoData(VideoCapture cap, Mat frame, int n, Scalar c)
     putText(frame, "FISH: " + to_string(n), Point(10, 45), FONT, 1, c, 2, 1);
 }
 
+
+void writeSchoolData(const vector <Fish> &school, ofstream &outFile, double bl)
+{
+    cout << "Computing fish speeds and directions..." << endl;
+
+    cout << "Fish# " << "PathLength(BL) " << "SwimSpeed(BL/s) " << "Direction" << endl;
+
+    for (size_t n = 0; n < 10; n++)
+    {
+
+        cout << n << " ";
+        
+
+        double path_length = calculatePathLength(school[n]) / bl;
+        cout << path_length << " ";
+
+        if (school[n].points.size() > 0)
+        {
+            int frame_total = school[n].points.back().frame - school[n].points.front().frame;
+            
+            double swim_time = frame_total * 0.1;
+            cout << frame_total <<" "<<  swim_time << " ";
+            cout << swim_time / path_length;
+            cout << endl;
+
+
+        }
+        else
+        {
+            cout << 0 << endl;
+        }
+    }
+
+
+       
+    
+
+
+    cout << endl << "---Raw Data---" << endl;
+    for (size_t n = 0; n < 10; n++)
+    {
+        cout << "Fish " << n << " ";
+        for (size_t i = 0; i < school[n].points.size(); ++i)
+        {
+            cout << "(" << school[n].points[i].frame << "," << school[n].points[i].p.x << "," << school[n].points[i].p.y << ") ";
+        }
+        cout << endl;
+    }
+          
+
+
+}
+
 int main()
 {
     Mat src, out_frame, start_frame;
@@ -180,8 +235,8 @@ int main()
     string out_filename;
     int deviceID = 0, apiID = cv::CAP_FFMPEG;      
     double length;
-    int frame_number, n = 5;
-    double bodylength = 0;
+    int frame_number, n = 0;
+    double bodylength = 200;
    
     vector <Fish> school;
 
@@ -318,7 +373,7 @@ int main()
          //Switch between animals
          if ((key >= 48) && (key < 58)) {
              n = key - 48;
-             cout << "Tracking switched to fish:" << n << endl;
+             cout << "Tracking switched to Fish:" << n << endl;
                           
              int tmp = cap.get(CAP_PROP_POS_FRAMES);
              cap.set(CAP_PROP_POS_FRAMES, tmp - 1);
@@ -333,7 +388,7 @@ int main()
          // Delete path for current animal
          if (key == 100) //d
          {
-             cout << "Path for fish " << n << "deleted" << endl;
+             cout << "Path for Fish " << n << " deleted" << endl;
              school[n].points.clear();
              
              src.copyTo(out_frame);
@@ -378,11 +433,12 @@ int main()
                  cout << "Error: Couldn't open the file!" << endl;
              }
 
-             outFile << "test";
+             writeSchoolData(school, outFile, bodylength);
+             
 
              outFile.close();
                           
-             cout << "Wrote to file!" << endl;
+           
 
          }
 
