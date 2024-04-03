@@ -120,7 +120,7 @@ class Fish
 
         double getPathLength(double bl) 
         {
-            double tl;
+            double tl = 0;
 
             for (size_t i = 1; i < points.size(); ++i) {
                 double dx = points[i].p.x - points[i - 1].p.x;
@@ -231,7 +231,6 @@ void writeSchoolData(vector <Fish> &school, ofstream &outFile, double bl)
             cout << 0 << endl;
         }
 
-        
     }
     
     outFile << endl << "---Raw Data---" << endl;
@@ -252,7 +251,7 @@ int main()
     VideoCapture cap;
     PointData mouse_pd;
     ofstream outFile;
-    string filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced.mp4", input_file;
+    string filename, input_file;
     string out_filename;
     int deviceID = 0, apiID = cv::CAP_FFMPEG;      
     double length;
@@ -261,8 +260,8 @@ int main()
    
     vector <Fish> school;
 
-    //cout << "Enter file path:";
-    //cin >> filename;
+    cout << "Enter file path:";
+    cin >> filename;
     out_filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced_test.txt";
     
     //construct school of fish
@@ -295,7 +294,7 @@ int main()
     setMouseCallback(filename, onMouseClick, &mouse_pd);
 
     //Measure body length
-    /*
+    
     cout << "Click to Measure BL" << endl;
     cout << "Press enter to confirm" << endl;
 
@@ -325,7 +324,7 @@ int main()
             break;
         } 
     }
-    */
+    
 
     //Tracking
      while (true) 
@@ -366,7 +365,9 @@ int main()
              // Check if the video has ended
              if (src.empty()) {
                  std::cout << "End of video." << std::endl;
-                 break;
+                 cap.set(CAP_PROP_POS_FRAMES, 0);
+                 cap >> src;
+                 //break;
              }
              
              src.copyTo(out_frame);
@@ -458,9 +459,28 @@ int main()
              
 
              outFile.close();
-                          
-           
+                  
+         }
 
+         if (key == 8) //home
+         {
+             cout << "home key" << endl;
+             cap.set(CAP_PROP_POS_FRAMES, 0);
+             cap >> src;
+             src.copyTo(out_frame);
+             updateVideoData(cap, out_frame, n, school[n].path_colour);
+             if (showAllPaths_Flag)
+             {
+                 for (int i = 0; i < 10; i++)
+                 {
+                     school[i].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
+                 }
+             }
+             else
+             {
+                 school[n].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
+             }
+             imshow(filename, out_frame);
          }
 
      }
