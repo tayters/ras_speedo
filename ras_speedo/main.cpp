@@ -109,6 +109,35 @@ class Fish
             }
          }
 
+        int getDirection() 
+        {
+            int d = points.back().p.y - points.front().p.y;
+            if (d >= 0)
+                return 1; //Clockwise
+            else
+                return -1; //Anti-Clockwise
+        }
+
+        double getPathLength(double bl) 
+        {
+            double tl;
+
+            for (size_t i = 1; i < points.size(); ++i) {
+                double dx = points[i].p.x - points[i - 1].p.x;
+                double dy = points[i].p.y - points[i - 1].p.y;
+                double distance = sqrt(dx * dx + dy * dy);
+                tl += distance;
+            }
+            return tl/bl;
+        }
+
+        double getSwimTime()
+        {
+            int frame_total = points.back().frame - points.front().frame;
+            double swim_time = frame_total * 0.1;
+
+            return swim_time;
+        }
 
         
         //Constructor
@@ -173,56 +202,48 @@ void updateVideoData(VideoCapture cap, Mat frame, int n, Scalar c)
 }
 
 
-void writeSchoolData(const vector <Fish> &school, ofstream &outFile, double bl)
+void writeSchoolData(vector <Fish> &school, ofstream &outFile, double bl)
 {
-    cout << "Computing fish speeds and directions..." << endl;
+    cout << "Computing fish speeds and directions..." << endl << endl;
 
-    cout << "Fish# " << "PathLength(BL) " << "SwimSpeed(BL/s) " << "Direction" << endl;
+    cout << "Fish# " << "PathLength(BL) " << "SwimTime(s) " << "SwimSpeed(BL/s) " << "Direction" << endl;
 
     for (size_t n = 0; n < 10; n++)
     {
-
         cout << n << " ";
         
-
-        double path_length = calculatePathLength(school[n]) / bl;
-        cout << path_length << " ";
+        double path_length_bl = school[n].getPathLength(bl);
+        cout << setprecision(3) << path_length_bl << " ";
 
         if (school[n].points.size() > 0)
         {
-            int frame_total = school[n].points.back().frame - school[n].points.front().frame;
+            double swim_time = school[n].getSwimTime();
+            cout << setprecision(3) << swim_time << " ";
+
+            double swim_speed = path_length_bl / swim_time;
+            cout << setprecision(3) << swim_speed << " ";
+
+            cout << school[n].getDirection() << endl;
             
-            double swim_time = frame_total * 0.1;
-            cout << frame_total <<" "<<  swim_time << " ";
-            cout << swim_time / path_length;
-            cout << endl;
-
-
         }
         else
         {
             cout << 0 << endl;
         }
+
+        
     }
-
-
-       
     
-
-
-    cout << endl << "---Raw Data---" << endl;
+    outFile << endl << "---Raw Data---" << endl;
     for (size_t n = 0; n < 10; n++)
     {
-        cout << "Fish " << n << " ";
+        outFile << "Fish " << n << " ";
         for (size_t i = 0; i < school[n].points.size(); ++i)
         {
-            cout << "(" << school[n].points[i].frame << "," << school[n].points[i].p.x << "," << school[n].points[i].p.y << ") ";
+            outFile << "(" << school[n].points[i].frame << "," << school[n].points[i].p.x << "," << school[n].points[i].p.y << ") ";
         }
-        cout << endl;
+        outFile << endl;
     }
-          
-
-
 }
 
 int main()
