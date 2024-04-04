@@ -259,7 +259,7 @@ int main()
 
     cout << "Enter file path:";
     cin >> filename;
-    out_filename = "C:\\Users\\jrap017\\Videos\\testvid_01_reduced_test.txt";
+    out_filename = filename.substr(0, filename.length() - 4) + ".txt";
     
     //construct school of fish
     for (int i = 0; i < 10; i++)
