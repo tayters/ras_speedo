@@ -85,13 +85,17 @@ class Fish
         
         void drawPath(Mat frame, int frame_number) {
 
+            
+
             if (points.size() == 1)
             {
                 circle(frame, points.back().p, 2, path_colour, cv::FILLED);
+                circle(frame, points.front().p, 2, path_colour, cv::FILLED);
             }
             else if (points.size() > 0)
             {
-                                
+                circle(frame, points.front().p, 2, path_colour, cv::FILLED);
+            
                 for (size_t i = 1; i < points.size(); ++i) {
                     
                     if (points[i].frame > frame_number)
@@ -202,30 +206,36 @@ void updateVideoData(VideoCapture cap, Mat frame, int n, Scalar c)
 void writeSchoolData(vector <Fish> &school, ofstream &outFile, double bl)
 {
     cout << "Computing fish speeds and directions..." << endl << endl;
-
     cout << "Fish# " << "PathLength(BL) " << "SwimTime(s) " << "SwimSpeed(BL/s) " << "Direction" << endl;
+    outFile << "Fish# " << "PathLength(BL) " << "SwimTime(s) " << "SwimSpeed(BL/s) " << "Direction" << endl;
 
     for (size_t n = 0; n < 10; n++)
     {
         cout << n << " ";
+        outFile << n << " ";
         
         double path_length_bl = school[n].getPathLength(bl);
         cout << setprecision(3) << path_length_bl << " ";
+        outFile << setprecision(3) << path_length_bl << " ";
 
         if (school[n].points.size() > 0)
         {
             double swim_time = school[n].getSwimTime();
             cout << setprecision(3) << swim_time << " ";
+            outFile << setprecision(3) << swim_time << " ";
 
             double swim_speed = path_length_bl / swim_time;
             cout << setprecision(3) << swim_speed << " ";
+            outFile << setprecision(3) << swim_speed << " ";
 
             cout << school[n].getDirection() << endl;
+            outFile << school[n].getDirection() << endl;
             
         }
         else
         {
             cout << 0 << endl;
+            outFile << 0 << endl;
         }
 
     }
@@ -305,11 +315,11 @@ int main()
 
         if (mouseClickRelease_Flag)
         {
-            cout << "startpoint: " << startpoint << endl;
-            cout << "endpoint: " << endpoint << endl;
+            //cout << "startpoint: " << startpoint << endl;
+            //cout << "endpoint: " << endpoint << endl;
             bodylength = calculateBL(startpoint, endpoint);
             cout << "Body Length (px): " << bodylength << endl;
-            mouseClickRelease_Flag = false;
+                        mouseClickRelease_Flag = false;
         }
         
         char key = waitKey(10);
@@ -318,6 +328,10 @@ int main()
         if (key == 13) {
             cout << "BL selected!" << endl;
             mouseClick_Flag = false;
+            src = start_frame.clone();
+            out_frame = start_frame.clone();
+            updateVideoData(cap, out_frame, n, school[n].path_colour);
+            imshow(filename, out_frame);
             break;
         } 
     }
@@ -418,7 +432,6 @@ int main()
 
          if (key == 115) //s
          {
-             cout << "s was pressed!" << endl;
              showAllPaths_Flag = !showAllPaths_Flag;
 
              src.copyTo(out_frame);
@@ -451,7 +464,7 @@ int main()
              if (!outFile) {
                  cout << "Error: Couldn't open the file!" << endl;
              }
-
+             outFile << "Body Length (px): " << bodylength << endl;
              writeSchoolData(school, outFile, bodylength);
              
 
