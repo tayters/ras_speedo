@@ -29,7 +29,7 @@ for %%F in ("%input_folder%\*.mp4") do (
 
  ## Video Analysis
  1. Run ras-speedo.exe.
- 2. Enter file path of video to analyse. You can copy filepath by holding the shift key, right clicking the file and selecting copy as path. (Make sure to delete the quotation marks).
+ 2. Enter the file path of video to analyse. You can copy the file path by holding the shift key, right clicking the file and selecting copy as path. (Make sure to delete the quotation marks).
  3. Draw a line on the frame to measure nominal fish body length and press enter. This will be used for speed calculation.
  4. Select 10 fish at random and track their swimming path through the video. Use a left mouse click to mark a point and the '>' '<' keys to cycle through the frames. Other commmands can be found below or by pressing the 'h' key.
 ```
