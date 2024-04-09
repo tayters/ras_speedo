@@ -1,7 +1,7 @@
 # ras_speedo
 
 ## Video conversion
-1. Edit trim.bat to change input and output folder (right click -> edit). e.g:
+1. Edit trim.bat to change the input and output folder (right click -> edit). e.g:
 ```
 @echo off
 setlocal enabledelayedexpansion
@@ -24,7 +24,10 @@ for %%F in ("%input_folder%\*.mp4") do (
     ffmpeg -i "%%F" -ss 00:00:00 -t 00:00:30 -vf scale=1280:720 -r 10 "%output_folder%\!filename!_trimmed.mp4"
 )
 ```
-2. Run trim.bat. This will go through the input folder and reduce the length, resolution and frame rate of the videos.
+2. Run trim.bat. This will go through the input folder and reduce the length, resolution and frame rate of the videos. It will then copy to the ouput folder.
 3. There will now be a folder of smaller videos ready for analysis.
 
  ## Video Analysis
+ 1. Run ras-speedo.exe.
+ 2. Enter file path of video to analyse. You can copy filepath by holding the shift key, right clicking the file and selecting copy as path. (Make sure to delete the quotation marks)
+ 3. Select 10 fish at random and track their swimming path through the video. Use a left mouse click to mark a point and the '>' '<' keys to cycle through the frames.
