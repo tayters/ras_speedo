@@ -196,7 +196,7 @@ double calculateBL(Point p1, Point p2)
 void updateVideoData(VideoCapture cap, Mat frame, int n, Scalar c)
 {
     rectangle(frame, Rect(Point(0, 0), Size(200, 80)), BLUE, FILLED);
-    line(frame, Point(640,0),Point(640,720), WHITE, 2);
+    //line(frame, Point(640,0),Point(640,720), WHITE, 2);
     putText(frame, "Frame: " + to_string((int)cap.get(CAP_PROP_POS_FRAMES)), Point(10, 15), FONT, 1, WHITE, 2, 1);
     putText(frame, "Time: " + to_string((float)cap.get(CAP_PROP_POS_MSEC) / 1000) + "s", Point(10, 30), FONT, 1, WHITE, 2, 1);
     putText(frame, "FISH: " + to_string(n), Point(10, 45), FONT, 1, c, 2, 1);
@@ -284,11 +284,12 @@ int main()
 
     //Initialize window for unprocessed data
     namedWindow(filename, WINDOW_NORMAL);
-    resizeWindow(filename, 1080, 720);
+    resizeWindow(filename, 1920, 1080);
  
     //Capture first src
     cap >> src;
     start_frame = src.clone();
+    out_frame = src.clone();
     imshow(filename, src);
      
     updateVideoData(cap, src, n, school[n].path_colour);
@@ -300,10 +301,12 @@ int main()
     cout << "Draw line to measure BL" << endl;
     cout << "Press enter to confirm" << endl;
 
+
+
     while (true)
     {
         if (drawing) {
-            src = start_frame.clone();
+            src = out_frame.clone();
             line(src, startpoint, endpoint, GREEN, 2);
             cv::imshow(filename, src);              
         }
@@ -331,6 +334,30 @@ int main()
             imshow(filename, out_frame);
             break;
         } 
+
+        //Frame step forward or backwards
+        if ((key == 46) || (key == 44))
+        {
+            if (key == 44)
+            {
+                //go back one frame
+                int tmp = cap.get(CAP_PROP_POS_FRAMES);
+                cap.set(CAP_PROP_POS_FRAMES, tmp - 2);
+            }
+
+            cap >> src;
+
+            // Check if the video has ended
+            if (src.empty()) {
+                std::cout << "End of video." << std::endl;
+                cap.set(CAP_PROP_POS_FRAMES, 0);
+                cap >> src;
+                //break;
+            }
+
+            src.copyTo(out_frame);
+            imshow(filename, out_frame);
+        }
     }
     
     cout << "Click to start tracking..." << endl;
