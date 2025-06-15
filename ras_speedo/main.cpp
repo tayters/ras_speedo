@@ -202,7 +202,6 @@ void updateVideoData(VideoCapture cap, Mat frame, int n, Scalar c)
     putText(frame, "FISH: " + to_string(n), Point(10, 45), FONT, 1, c, 2, 1);
 }
 
-
 void writeSchoolData(vector <Fish> &school, ofstream &outFile, double bl)
 {
     cout << "Computing fish speeds and directions..." << endl << endl;
@@ -258,12 +257,9 @@ int main()
     VideoCapture cap;
     PointData mouse_pd;
     ofstream outFile;
-    string filename, input_file;
-    string out_filename;
-    int deviceID = 0, apiID = cv::CAP_FFMPEG;      
-    double length;
-    int frame_number, n = 0;
-    double bodylength = 200;
+    string filename, input_file, out_filename;
+    int deviceID = 0, apiID = cv::CAP_FFMPEG, frame_number, n = 0;
+    double length, bodylength = 200;
    
     vector <Fish> school;
 
@@ -283,7 +279,7 @@ int main()
     // check if we succeeded
     if (!cap.isOpened()) {
         cerr << "ERROR! Unable to open video file\n";
-        //return -1;
+        return 0;
     }
 
     //Initialize window for unprocessed data
@@ -301,8 +297,7 @@ int main()
     setMouseCallback(filename, onMouseClick, &mouse_pd);
 
     //Measure body length
-    
-    cout << "Click to Measure BL" << endl;
+    cout << "Draw line to measure BL" << endl;
     cout << "Press enter to confirm" << endl;
 
     while (true)
@@ -323,8 +318,10 @@ int main()
         }
         
         char key = waitKey(10);
+
         if (key == 27) // Esc key to exit
             break;
+
         if (key == 13) {
             cout << "BL selected!" << endl;
             mouseClick_Flag = false;
@@ -336,6 +333,8 @@ int main()
         } 
     }
     
+    cout << "Click to start tracking..." << endl;
+    cout << "Press 'h' to see commands" << endl;
 
     //Tracking
      while (true) 
@@ -443,12 +442,12 @@ int main()
                  {
                      school[i].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
                  }
-                 cout << "All paths" << endl;
+                 cout << "Showing all paths" << endl;
              }
              else
              {
                  school[n].drawPath(out_frame, cap.get(CAP_PROP_POS_FRAMES));
-                 cout << "One path" << endl;
+                 cout << "Showing one path" << endl;
              }
              imshow(filename, out_frame);
          
@@ -472,9 +471,9 @@ int main()
                   
          }
 
-         if (key == 8) //home
+         if (key == 8) //Backspace
          {
-             cout << "home key" << endl;
+             cout << "Returning to start of clip." << endl;
              cap.set(CAP_PROP_POS_FRAMES, 0);
              cap >> src;
              src.copyTo(out_frame);
@@ -492,6 +491,19 @@ int main()
              }
              imshow(filename, out_frame);
          }
+
+         if (key == 104) //h help commands
+         {
+             cout << "----------- Commands ------------" << endl;
+             cout << "'>' - move forward one frame"<< endl;
+             cout << "'<' - move backward one frame" << endl;
+             cout << "'0-9' - switch between fish to track" << endl;
+             cout << "'s' - toggle showing all fish paths" << endl;
+             cout << "'d' - delete all points on current path" << endl;
+             cout << "'w' - write data to file" << endl;
+             cout << "'Backspace' - return to first frame" << endl;
+             cout << "---------------------------------" << endl;
+          }
 
      }
 
