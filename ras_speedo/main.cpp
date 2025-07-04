@@ -46,6 +46,7 @@ class Fish
 {
     public:
         int index;
+        double bodylength;
         vector <PointData> points;
         Scalar path_colour;
                      
@@ -259,7 +260,7 @@ int main()
     ofstream outFile;
     string filename, input_file, out_filename;
     int deviceID = 0, apiID = cv::CAP_FFMPEG, frame_number, n = 0;
-    double length, bodylength = 200;
+    double length, defaultbodylength = 200;
    
     vector <Fish> school;
 
@@ -315,8 +316,8 @@ int main()
         {
             //cout << "startpoint: " << startpoint << endl;
             //cout << "endpoint: " << endpoint << endl;
-            bodylength = calculateBL(startpoint, endpoint);
-            cout << "Body Length (px): " << bodylength << endl;
+            defaultbodylength = calculateBL(startpoint, endpoint);
+            cout << "Body Length (px): " << defaultbodylength << endl;
                         mouseClickRelease_Flag = false;
         }
         
@@ -332,6 +333,12 @@ int main()
             out_frame = start_frame.clone();
             updateVideoData(cap, out_frame, n, school[n].path_colour);
             imshow(filename, out_frame);
+
+            for (int i = 0; i < 10; i++)
+            {
+                school[i].bodylength = defaultbodylength;
+            }
+
             break;
         } 
 
@@ -344,6 +351,7 @@ int main()
                 int tmp = cap.get(CAP_PROP_POS_FRAMES);
                 cap.set(CAP_PROP_POS_FRAMES, tmp - 2);
             }
+            
 
             cap >> src;
 
@@ -490,8 +498,8 @@ int main()
              if (!outFile) {
                  cout << "Error: Couldn't open the file!" << endl;
              }
-             outFile << "Body Length (px): " << bodylength << endl;
-             writeSchoolData(school, outFile, bodylength);
+             outFile << "Body Length (px): " << defaultbodylength << endl;
+             writeSchoolData(school, outFile, defaultbodylength);
              
 
              outFile.close();
