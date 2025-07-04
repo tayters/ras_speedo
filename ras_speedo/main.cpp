@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <windows.h>
 
 #define RED Scalar(0,0,255)
 #define ORANGE Scalar(0,165,255)
@@ -285,15 +286,32 @@ int main()
     }
 
     //Initialize window for unprocessed data
-    namedWindow(filename, WINDOW_NORMAL);
-    resizeWindow(filename, 1920, 1080);
- 
-    //Capture first src
     cap >> src;
     start_frame = src.clone();
     out_frame = src.clone();
+
+
+
+
+    // Create a resizable window and resize to 75% of 1920x1080
+    int win_width = static_cast<int>(1920 * 0.75);
+    int win_height = static_cast<int>(1080 * 0.75);
+
+    namedWindow(filename, WINDOW_NORMAL);
+    resizeWindow(filename, win_width, win_height);
+
+    // Try to restore previous window position if available
+    int win_x = -1, win_y = -1;
+    std::ifstream posFile("window_pos.txt");
+    if (posFile.is_open()) {
+        posFile >> win_x >> win_y;
+        posFile.close();
+        if (win_x >= 0 && win_y >= 0) {
+            moveWindow(filename, win_x, win_y);
+        }
+    }
+
     imshow(filename, src);
-     
     updateVideoData(cap, src, n, school[n].path_colour);
 
     //Set up mouse callback
@@ -572,6 +590,22 @@ int main()
             cout << "'Backspace' - return to first frame" << endl;
             cout << "---------------------------------" << endl;
         }
+    }
+
+    // Before closing, save window position
+    int final_x = -1, final_y = -1;
+    try {
+        // Only works if window is visible
+        Rect winRect = getWindowImageRect(filename);
+        final_x = winRect.x;
+        final_y = winRect.y;
+    } catch (...) {
+        // If getWindowImageRect fails, do nothing
+    }
+    std::ofstream posFileOut("window_pos.txt");
+    if (posFileOut.is_open()) {
+        posFileOut << final_x << " " << final_y << std::endl;
+        posFileOut.close();
     }
 
     // Release the video capture object and close the window
