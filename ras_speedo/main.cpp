@@ -9,7 +9,10 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+
 #include <windows.h>
+#include <commdlg.h> // For GetOpenFileName
+#pragma comment(lib, "Comdlg32.lib")
 
 #define RED Scalar(0,0,255)
 #define ORANGE Scalar(0,165,255)
@@ -227,8 +230,27 @@ int main()
    
     vector <Fish> school;
 
-    cout << "Enter file path:";
-    cin >> filename;
+    // Use Windows file dialog to select file
+    OPENFILENAMEW ofn;       // common dialog box structure
+    wchar_t szFile[260] = { 0 };
+    ZeroMemory(&ofn, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = NULL;
+    ofn.lpstrFile = szFile;
+    ofn.nMaxFile = sizeof(szFile) / sizeof(szFile[0]);
+    ofn.lpstrFilter = L"Video Files\0*.mp4;*.avi;*.mov;*.mkv;*.wmv\0All Files\0*.*\0";
+    ofn.nFilterIndex = 1;
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+    cout << "Select a video file..." << endl;
+    if (GetOpenFileNameW(&ofn) == TRUE) {
+        // Convert wchar_t* to std::string (UTF-8)
+        std::wstring ws(szFile);
+        filename = std::string(ws.begin(), ws.end());
+    } else {
+        cerr << "No file selected. Exiting." << endl;
+        return 0;
+    }
     out_filename = filename.substr(0, filename.length() - 4) + ".txt";
     
     //construct school of fish
@@ -255,8 +277,8 @@ int main()
 
 
     // Create a resizable window and resize to 75% of 1920x1080
-    int win_width = static_cast<int>(1920 * 0.75);
-    int win_height = static_cast<int>(1080 * 0.75);
+    int win_width = static_cast<int>(1920 * 0.9);
+    int win_height = static_cast<int>(1080 * 0.9);
 
     namedWindow(filename, WINDOW_NORMAL);
     resizeWindow(filename, win_width, win_height);
