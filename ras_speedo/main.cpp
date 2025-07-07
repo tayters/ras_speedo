@@ -94,7 +94,7 @@ public:
     }
 
     int getDirection() {
-        int d = points.back().p.y - points.front().p.y;
+        int d = points.back().p.x - points.front().p.x;
         if (d >= 0)
             return 1; // Clockwise
         else
